@@ -1,47 +1,58 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.AI;
 
 public class AgentScript : MonoBehaviour
 {
     NavMeshAgent agent;
     [SerializeField] Transform[] patrolPoints;
-    [SerializeField] bool isPatroling = true;
-    [SerializeField] float arrivalDistance;
+    [SerializeField] float arrivalDistance = 1f;
     [SerializeField] Animator anim;
-    [SerializeField] float velocity;
-    [SerializeField] Transform currentDestination;
-    [SerializeField] int currentPatrolPointIndex;
+    [SerializeField] RaycastScript Raycast; 
 
-    private void Awake()
+    private Transform currentDestination;
+    private int currentPatrolPointIndex = 0;
+    private Transform playerTransform;
+    private bool persiguiendo = false;
+
+    void Awake()
     {
         agent = GetComponent<NavMeshAgent>();
-    }
-    // Start is called before the first frame update
-    void Start()
-    {
-        currentDestination = patrolPoints[0];
-        currentPatrolPointIndex = 0;
+        GameObject playerGO = GameObject.FindWithTag("Player");
+        if (playerGO != null)
+            playerTransform = playerGO.transform;
+        else
+            Debug.LogError("No se encontró el player con tag 'Player'");
     }
 
-    // Update is called once per frame
+    void Start()
+    {
+        if (patrolPoints.Length > 0)
+        {
+            currentPatrolPointIndex = 0;
+            currentDestination = patrolPoints[currentPatrolPointIndex];
+            agent.SetDestination(currentDestination.position);
+        }
+    }
+
     void Update()
     {
-        if (agent.hasPath && agent.remainingDistance <= arrivalDistance)
+        if (Raycast != null && Raycast.jugadorVisible && playerTransform != null)
         {
-            if (currentPatrolPointIndex < patrolPoints.Length - 1)
-            {
-                currentPatrolPointIndex++;
-            }
-            else
-            {
-                currentPatrolPointIndex = 0;
-            }
-            currentDestination = patrolPoints[currentPatrolPointIndex];
+            persiguiendo = true;
+            currentDestination = playerTransform;
         }
-        agent.destination = currentDestination.position;
-        velocity = agent.velocity.magnitude;
-        anim.SetFloat("Speed", velocity);
+        else
+        {
+            if (persiguiendo) persiguiendo = false; 
+
+            if (!agent.pathPending && agent.remainingDistance <= arrivalDistance)
+            {
+                currentPatrolPointIndex = (currentPatrolPointIndex + 1) % patrolPoints.Length;
+                currentDestination = patrolPoints[currentPatrolPointIndex];
+            }
+        }
+
+            agent.SetDestination(currentDestination.position);
+            anim.SetFloat("Speed", agent.velocity.magnitude);
     }
 }
