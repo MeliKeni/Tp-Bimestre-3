@@ -7,21 +7,19 @@ public class AgentScript : MonoBehaviour
     [SerializeField] Transform[] patrolPoints;
     [SerializeField] float arrivalDistance = 1f;
     [SerializeField] Animator anim;
-    [SerializeField] RaycastScript Raycast; 
+    [SerializeField] RaycastSight Raycast;
+    [SerializeField] float velocity;
+    [SerializeField] Transform playerTransform;
+
 
     private Transform currentDestination;
     private int currentPatrolPointIndex = 0;
-    private Transform playerTransform;
     private bool persiguiendo = false;
+    public Transform nuevaDireccion;
 
     void Awake()
     {
         agent = GetComponent<NavMeshAgent>();
-        GameObject playerGO = GameObject.FindWithTag("Player");
-        if (playerGO != null)
-            playerTransform = playerGO.transform;
-        else
-            Debug.LogError("No se encontró el player con tag 'Player'");
     }
 
     void Start()
@@ -36,23 +34,34 @@ public class AgentScript : MonoBehaviour
 
     void Update()
     {
-        if (Raycast != null && Raycast.jugadorVisible && playerTransform != null)
+        if (Raycast.jugadorVisible == true)
         {
-            persiguiendo = true;
-            currentDestination = playerTransform;
+            nuevaDireccion = playerTransform;
+            agent.SetDestination(nuevaDireccion.position);
         }
         else
         {
-            if (persiguiendo) persiguiendo = false; 
-
-            if (!agent.pathPending && agent.remainingDistance <= arrivalDistance)
+            // Si el agente está cerca del punto actual, cambia al siguiente
+            if (agent.remainingDistance <= arrivalDistance)
             {
-                currentPatrolPointIndex = (currentPatrolPointIndex + 1) % patrolPoints.Length;
+                if (currentPatrolPointIndex < patrolPoints.Length - 1)
+                {
+                    currentPatrolPointIndex++;
+                }
+                else
+                {
+                    currentPatrolPointIndex = 0;
+                }
                 currentDestination = patrolPoints[currentPatrolPointIndex];
             }
+
+            // Asegúrate de asignar siempre el destino a currentDestination
+            agent.SetDestination(currentDestination.position);
         }
 
-            agent.SetDestination(currentDestination.position);
-            anim.SetFloat("Speed", agent.velocity.magnitude);
+        velocity = agent.velocity.magnitude;
+        anim.SetFloat("Speed", velocity);
     }
+
+
 }
