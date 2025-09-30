@@ -9,6 +9,7 @@ public class RaycastSight : MonoBehaviour
     [SerializeField] float rayLenght = 3f;
     public bool jugadorVisible = false;
     public float tiempoSinVer = 0f;
+    public bool enContacto=false;
 
 
 
