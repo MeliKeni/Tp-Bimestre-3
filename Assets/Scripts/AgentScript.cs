@@ -1,5 +1,9 @@
-﻿using UnityEngine;
+﻿using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
 using UnityEngine.AI;
+using UnityEngine.SceneManagement;
+
 
 public class AgentScript : MonoBehaviour
 {
@@ -61,6 +65,12 @@ public class AgentScript : MonoBehaviour
 
         velocity = agent.velocity.magnitude;
         anim.SetFloat("Speed", velocity);
+
+        if (Raycast.enContacto == true)
+        {
+            SceneManager.LoadScene("EscenaPerder");
+
+        }
     }
 
 

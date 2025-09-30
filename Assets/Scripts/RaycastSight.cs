@@ -1,14 +1,13 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using static UnityEngine.UI.Image;
 
 public class RaycastSight : MonoBehaviour
 {
     [SerializeField] Transform originTR;
-    [SerializeField] float rayLenght = 3f;
+    [SerializeField] float rayLenght = 2f;
     public bool jugadorVisible = false;
-    public float tiempoSinVer = 0f;
+    public float tiempoSinVer = 0f; 
     public bool enContacto=false;
 
 
@@ -26,7 +25,12 @@ public class RaycastSight : MonoBehaviour
         RaycastHit hitInfo;
 
         if (Physics.Raycast(originTR.position, originTR.forward, out hitInfo, rayLenght))
-        {
+        {   
+            if(hitInfo.distance < 0.3)
+            {
+                enContacto = true;
+                Debug.Log("encontacto");
+            }
             if (hitInfo.collider.CompareTag("Player"))
             {
                 jugadorVisible = true;
@@ -36,6 +40,7 @@ public class RaycastSight : MonoBehaviour
             else
             {
                 tiempoSinVer += Time.deltaTime;
+                Debug.Log(tiempoSinVer);
             }
         }
         if (tiempoSinVer > 2)
